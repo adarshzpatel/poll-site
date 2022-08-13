@@ -1,23 +1,36 @@
-import type { NextPage } from 'next'
-import {prisma} from "../db/client"
+import type { NextPage } from "next";
+import { trpc } from "../utils/trpc";
 
-const Home: NextPage = (props) => {
+const QuestionCreator: React.FC = () => {
+  const { mutate } = trpc.useMutation("questions.create");
+
+  return (
+    <input
+      onSubmit={(event) => {
+        console.log();
+      }}
+    ></input>
+  );
+};
+
+const Home: NextPage = () => {
+  const { data, isLoading } = trpc.useQuery(["questions.get-all"]);
+
+  if (isLoading || !data) return <div> Loading </div>;
+
+  console.log(data);
   return (
     <div>
-      <p className='text-4xl'>{props.questions}</p>
+      <div>
+        <h6>Questions</h6>
+        <div>
+          {data?.map((q) => (
+            <div key={q.id}>{q.question}</div>
+          ))}
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
-
-
-export const getServerSideProps = async () => {
-  const questions = await prisma?.pollQuestion.findMany();
-  
-  return {
-    props: {
-      questions:JSON.stringify(questions)
-    }
-  }
-}
+export default Home;

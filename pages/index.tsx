@@ -1,6 +1,7 @@
 import React from "react";
 import type { NextPage } from "next";
 import { trpc } from "../utils/trpc";
+import Link from "next/link"
 
 const QuestionCreator: React.FC = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -9,7 +10,7 @@ const QuestionCreator: React.FC = () => {
   const { mutate, isLoading } = trpc.useMutation("questions.create", {
     onSuccess() {
       // invalidate queries forces it to refetch the questions when mutation is success
-      client.invalidateQueries("questions.get-all");
+      client.invalidateQueries("questions.get-all-my-questions");
       if (!inputRef.current) return;
       inputRef.current.value = "";
     },
@@ -31,7 +32,7 @@ const QuestionCreator: React.FC = () => {
 };
 
 const Home: NextPage = () => {
-  const { data, isLoading } = trpc.useQuery(["questions.get-all"]);
+  const { data, isLoading } = trpc.useQuery(["questions.get-all-my-questions"]);
 
   if (isLoading || !data) return <div> Loading </div>;
 
@@ -47,9 +48,11 @@ const Home: NextPage = () => {
         <h6 className="text-2xl font-bold mb-4">Questions</h6>
         <div className="flex flex-col gap-4">
           {data?.map((q) => (
-            <div className="question" key={q.id}>
+            <Link key={q.id} href={`/question/${q.id}`}>
+            <div className="question" >
               {q.question}
             </div>
+            </Link>
           ))}
         </div>
       </div>
